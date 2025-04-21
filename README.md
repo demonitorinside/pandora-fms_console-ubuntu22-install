@@ -66,7 +66,7 @@ Puedes consultar o ejecutar todos los comandos desde este archivo incluido en el
 
 ## 📷 Vista previa del video explicativo
 
-*(Próximamente)*
+https://youtu.be/cI4OV4_Y1pI
 
 ---
 

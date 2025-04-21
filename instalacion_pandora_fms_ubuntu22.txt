@@ -1,0 +1,62 @@
+# 📦 Actualizar sistema
+sudo apt update && sudo apt upgrade -y
+
+# 🧩 Instalar dependencias necesarias
+sudo apt install apache2 mariadb-server libapache2-mod-php php php-mysql php-xml php-mbstring php-curl php-ldap php-gd php-zip php-bcmath unzip wget curl gnupg -y
+
+# 🗃️ Iniciar y habilitar servicios
+sudo systemctl enable apache2 mariadb
+sudo systemctl start apache2 mariadb
+
+# 🔐 Configurar base de datos de Pandora FMS
+sudo mysql -u root -p
+# Dentro del prompt de MySQL:
+# (Reemplaza "tu_password_segura" si deseas cambiarla)
+CREATE DATABASE pandora CHARACTER SET utf8 COLLATE utf8_general_ci;
+CREATE USER 'pandora'@'localhost' IDENTIFIED BY 'pandora';
+GRANT ALL PRIVILEGES ON pandora.* TO 'pandora'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+
+# 📁 Descargar Pandora FMS Console (versión 7.0NG.777)
+wget https://github.com/pandorafms/pandorafms/releases/download/v777-LTS/pandorafms_console-7.0NG.777.tar.gz
+
+# 📦 Descomprimir el archivo
+tar -xzvf pandorafms_console-7.0NG.777.tar.gz
+
+# 📂 Mover el contenido al directorio web
+sudo mv pandora_console /var/www/html/
+
+# 🔒 Dar permisos adecuados
+sudo chown -R www-data:www-data /var/www/html/pandora_console
+sudo chmod -R 755 /var/www/html/pandora_console
+
+# ⚙️ Habilitar el módulo rewrite de Apache
+sudo a2enmod rewrite
+
+# 🧾 Configurar virtual host en Apache (opcional)
+sudo nano /etc/apache2/sites-available/pandora.conf
+# Pega lo siguiente:
+<VirtualHost *:80>
+    ServerAdmin webmaster@localhost
+    DocumentRoot /var/www/html/pandora_console
+    <Directory /var/www/html/pandora_console>
+        Options FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    ErrorLog ${APACHE_LOG_DIR}/pandora_error.log
+    CustomLog ${APACHE_LOG_DIR}/pandora_access.log combined
+</VirtualHost>
+
+# 💡 Activar sitio y reiniciar Apache
+sudo a2ensite pandora.conf
+sudo a2dissite 000-default.conf
+sudo systemctl reload apache2
+
+# 🌐 Acceder desde navegador
+# Ir a: http://localhost/pandora_console
+# y seguir el proceso web de instalación
+
+# 🧹 Limpieza (una vez terminada la instalación desde navegador)
+sudo rm /var/www/html/pandora_console/install.php
